@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Firebase Workshop</title>
+    <style>
+        table {
+            margin-top: 10px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button.delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button.delete-btn:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input type="text" id="bookTitle" placeholder="Titre du livre" />
+        <input type="text" id="bookAuthor" placeholder="Auteur du livre" />
+
+        <label for="isYouthBook">Livre jeunesse :</label>
+        <select id="isYouthBook">
+            <option value="false">Non</option>
+            <option value="true">Oui</option>
+        </select>
+
+        <button id="saveBookBtn" type="button">Ajouter un livre</button>
+        <br><br>
+        <button id="fetchBooksBtn" type="button">Afficher les livres</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Auteur</th>
+                    <th>Jeunesse</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="booksTableBody">
+                <!-- Les livres seront affichés ici -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getFirestore, addDoc, collection, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function addBookFromInput() {
+            const title = document.getElementById("bookTitle").value.trim();
+            const author = document.getElementById("bookAuthor").value.trim();
+            const isYouthBook = document.getElementById("isYouthBook").value === "true";
+
+            if (!title || !author) {
+                console.log("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "books"), { title, author, isYouthBook });
+                console.log(`Livre "${title}" ajouté avec succès !`);
+
+                document.getElementById("bookTitle").value = "";
+                document.getElementById("bookAuthor").value = "";
+                document.getElementById("isYouthBook").value = "false";
+
+                fetchBooks(); // Mettre à jour la liste après ajout
+            } catch (error) {
+                console.log("Erreur lors de l'ajout du livre :", error);
+            }
+        }
+
+        async function fetchBooks() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "books"));
+                const books = [];
+
+                querySnapshot.forEach((doc) => {
+                    books.push({ id: doc.id, ...doc.data() });
+                });
+
+                displayBooks(books);
+                console.log("Livres récupérés !");
+            } catch (error) {
+                console.log("Erreur lors de la récupération des livres :", error);
+            }
+        }
+
+        function displayBooks(books) {
+            const booksTableBody = document.getElementById("booksTableBody");
+            booksTableBody.innerHTML = "";
+
+            books.forEach((book) => {
+                const isYouthIcon = book.isYouthBook ? "✅" : "❌";
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${isYouthIcon}</td>
+                    <td><button class="delete-btn" data-id="${book.id}">🗑️ Supprimer</button></td>
+                `;
+
+                booksTableBody.appendChild(row);
+            });
+
+            document.querySelectorAll(".delete-btn").forEach(button => {
+                button.addEventListener("click", async (event) => {
+                    const bookId = event.target.getAttribute("data-id");
+                    await deleteBook(bookId);
+                });
+            });
+        }
+
+        async function deleteBook(bookId) {
+            //!! A AJOUTER
+        }
+
+        document.getElementById('saveBookBtn').addEventListener('click', addBookFromInput);
+        document.getElementById('fetchBooksBtn').addEventListener('click', fetchBooks);
+
+    </script>
+
+</body>
+
+</html>

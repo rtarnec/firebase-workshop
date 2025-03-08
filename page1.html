@@ -6,44 +6,48 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-    <title>Firebase app</title>
+    <title>Firebase Workshop</title>
 </head>
 
 <body>
     <div>
-        <button type="button" onclick="saveBook">Enrergistrer le livre</button>
+        <button id="saveBookBtn1" type="button">Ajouter un livre</button> <br>
+        <button id="saveBookBtn2" type="button">Ajouter un autre livre</button>
     </div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
 
+        // Importation des modules Firebase nécessaires
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js'
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
-        // Add Firebase products that you want to use
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-
+        // Configuration Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
-            authDomain: "test1-d0da2.firebaseapp.com",
-            projectId: "test1-d0da2",
-            storageBucket: "test1-d0da2.firebasestorage.app",
-            messagingSenderId: "132059408217",
-            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
+
         };
 
-        // Initialize Firebase
+
+        // Initialisation de l'application Firebase avec la configuration
         const app = initializeApp(firebaseConfig);
 
-        // Get references to the Firebase services
+        // Obtention d'une référence à la base de données Firestore
         const db = getFirestore(app);
 
+        // Fonction !!asynchrone!! pour enregistrer un livre dans Firestore
         async function saveBook() {
-            await addDoc(collection(db, "books"), {
-                title: "La trilogie new-yorkaise",
-                author: "Paul Auster",
-                //                creationDate: serverTimestamp(),
-            });
+
         }
+
+        async function saveBookWithSet() {
+
+        }        
+
+        document.getElementById('saveBookBtn1').addEventListener('click', saveBook);
+        // Pourquoi cette ligne définissant un écouteur d’événement (event handler) sur le bouton?
+        // Le script étant un module, les variables et fonctions ne sont pas accessibles dans le scope global.
+        // En conséquence <button onclick="saveBook()">Ajouter un livre</button> ne marcherait pas par défaut
+
+        document.getElementById('saveBookBtn2').addEventListener('click', saveBookWithSet);
 
     </script>
 

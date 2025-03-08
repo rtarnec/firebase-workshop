@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>Firebase Workshop</title>
+</head>
+
+<body>
+    <div>
+        <!-- Champs pour saisir le titre et l'auteur du livre -->
+        <input type="text" id="bookTitle" placeholder="Titre du livre" />
+        <input type="text" id="bookAuthor" placeholder="Auteur du livre" />
+        
+        <button id="saveBookBtn" type="button">Ajouter un livre</button>
+    </div>
+
+    <script type="module">
+        // Importation des modules Firebase nécessaires
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getFirestore, addDoc, collection } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
+            authDomain: "test1-d0da2.firebaseapp.com",
+            projectId: "test1-d0da2",
+            storageBucket: "test1-d0da2.firebasestorage.app",
+            messagingSenderId: "132059408217",
+            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
+        };
+
+        // Initialisation de l'application Firebase avec la configuration
+        const app = initializeApp(firebaseConfig);
+
+        // Obtention d'une référence à la base de données Firestore
+        const db = getFirestore(app);
+
+        // Fonction asynchrone pour récupérer les valeurs des champs et enregistrer le livre dans Firestore
+        async function addBookFromInput() {
+            // Récupération des valeurs des champs input
+            const title = document.getElementById("bookTitle").value.trim();
+            const author = document.getElementById("bookAuthor").value.trim();
+
+            // Vérification que les champs ne sont pas vides
+            if (!title || !author) {
+                console.log("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                // Ajout du livre dans la collection "books" de Firestore
+                await addDoc(collection(db, "books"), {
+                    title: title,
+                    author: author,
+                    // creationDate: serverTimestamp(), // Décommente si besoin
+                });
+
+                console.log(`Livre "${title}" ajouté avec succès !`);
+
+                // Optionnel : Réinitialiser les champs après ajout
+                document.getElementById("bookTitle").value = "";
+                document.getElementById("bookAuthor").value = "";
+
+            } catch (error) {
+                console.log("Erreur lors de l'ajout du livre :", error);
+            }
+        }
+
+        // Ajout d'un écouteur d'événement au bouton pour appeler la fonction
+        document.getElementById('saveBookBtn').addEventListener('click', addBookFromInput);
+    </script>
+
+</body>
+
+</html>

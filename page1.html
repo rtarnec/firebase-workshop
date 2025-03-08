@@ -19,11 +19,16 @@
 
         // Importation des modules Firebase nécessaires
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js'
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+        import { getFirestore, addDoc, collection, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
         // Configuration Firebase
         const firebaseConfig = {
-
+            apiKey: "AIzaSyAk-2hYI69b1kAYKZYmQSAluXkj0ush2Y4",
+            authDomain: "workshop8-1a791.firebaseapp.com",
+            projectId: "workshop8-1a791",
+            storageBucket: "workshop8-1a791.firebasestorage.app",
+            messagingSenderId: "413871786051",
+            appId: "1:413871786051:web:01b6fa9d13a75a6fbcacf6"
         };
 
         // Initialisation de l'application Firebase avec la configuration
@@ -34,11 +39,29 @@
 
         // Fonction !!asynchrone!! pour enregistrer un livre dans Firestore
         async function saveBook() {
+            try {
+                const docRef = await addDoc(collection(db, "books"), {
+                    title: "La trilogie new-yorkaise",
+                    author: "Paul Auster",
+                });
 
+                console.log("Livre enregistré! - ID: " + docRef.id )
+            } catch (error) {
+                console.log(error)
+            }
         }
 
         async function saveBookWithSet() {
-            // !! CODE A AJOUTER
+            try {
+                await setDoc(doc(db, "books", "livre2"), {
+                    title: "Une si longue lettre",
+                    author: "Mariama Bâ",
+                });
+
+                console.log("Livre enregistré! ")
+            } catch (error) {
+                console.log(error)
+            }
         }
 
         document.getElementById('saveBookBtn1').addEventListener('click', saveBook);

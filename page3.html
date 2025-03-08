@@ -44,7 +44,12 @@
 
         // Configuration Firebase
         const firebaseConfig = {
-
+            apiKey: "AIzaSyAk-2hYI69b1kAYKZYmQSAluXkj0ush2Y4",
+            authDomain: "workshop8-1a791.firebaseapp.com",
+            projectId: "workshop8-1a791",
+            storageBucket: "workshop8-1a791.firebasestorage.app",
+            messagingSenderId: "413871786051",
+            appId: "1:413871786051:web:01b6fa9d13a75a6fbcacf6"
         };
 
         // Initialisation de l'application Firebase avec la configuration
@@ -78,7 +83,23 @@
         // Fonction pour récupérer et afficher tous les livres
         async function fetchBooks() {
 
-            // !! CODE A AJOUTER
+            try {
+                const querySnapshot = await getDocs(collection(db, "books"));
+                const booksTableBody = document.getElementById("booksTableBody");
+
+                // Vider la table avant de l'actualiser
+                booksTableBody.innerHTML = "";
+
+                querySnapshot.forEach((doc) => {
+                    const book = doc.data();
+                    const row = `<tr><td>${book.title}</td><td>${book.author}</td></tr>`;
+                    booksTableBody.innerHTML += row;
+                });
+
+                console.log("Livres récupérés !");
+            } catch (error) {
+                console.log("Erreur lors de la récupération des livres :", error);
+            }
 
         }
 

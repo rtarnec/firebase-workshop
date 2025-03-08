@@ -86,8 +86,7 @@
         }
 
         // Écouteur en temps réel pour les livres dans Firestore
-        
-        // !! CODE A AJOUTER
+        onSnapshot(collection(db, "books"), displayBooks);
 
         // Ajout des écouteurs d'événements
         document.getElementById('saveBookBtn').addEventListener('click', addBookFromInput);

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Firebase Workshop</title>
+    <title>Firebase Workshop - Page 1</title>
     <style>
         table {
             margin-top: 10px;
@@ -72,7 +72,12 @@
         import { getFirestore, addDoc, collection, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
         const firebaseConfig = {
-            
+            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
+            authDomain: "test1-d0da2.firebaseapp.com",
+            projectId: "test1-d0da2",
+            storageBucket: "test1-d0da2.firebasestorage.app",
+            messagingSenderId: "132059408217",
+            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -145,7 +150,13 @@
         }
 
         async function deleteBook(bookId) {
-             // !! CODE A AJOUTER
+            try {
+                await deleteDoc(doc(db, "books", bookId));
+                console.log(`Livre supprimé : ${bookId}`);
+                fetchBooks(); // Mettre à jour la liste après suppression
+            } catch (error) {
+                console.log("Erreur lors de la suppression :", error);
+            }
         }
 
         document.getElementById('saveBookBtn').addEventListener('click', addBookFromInput);

@@ -95,8 +95,14 @@
 
         async function fetchBooks(filter = "all") {
             try {
-
-                 // !! CODE A AJOUTER
+                let booksQuery;
+                if (filter === "youth") {
+                    booksQuery = query(collection(db, "books"), where("isYouthBook", "==", true));
+                } else if (filter === "adult") {
+                    booksQuery = query(collection(db, "books"), where("isYouthBook", "==", false));
+                } else {
+                    booksQuery = collection(db, "books");
+                }
 
                 const querySnapshot = await getDocs(booksQuery);
                 const books = [];

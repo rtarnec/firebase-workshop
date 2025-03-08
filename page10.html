@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Connexion</title>
+</head>
+
+<body>
+    <div>
+        <h2>Connexion</h2>
+        <input type="email" id="userEmail" placeholder="Email" />
+        <input type="password" id="userPassword" placeholder="Mot de passe" />
+        <button id="signInBtn" type="button">Sign In</button>
+        <button id="signOutBtn" type="button">Sign Out</button>
+        <br><br>
+        
+        <div id="userInfo">
+            <p><strong>État de connexion :</strong> <span id="authStatus">Non connecté</span></p>
+            <p><strong>Email :</strong> <span id="userEmailDisplay">-</span></p>
+            <p><strong>ID :</strong> <span id="userIdDisplay">-</span></p>
+            <p><strong>Email vérifié :</strong> <span id="emailVerified">-</span></p>
+        </div>
+
+        <button id="verifyEmailBtn" type="button" style="display: none;">Vérifier mon email</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged, 
+            sendEmailVerification 
+        } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
+            authDomain: "test1-d0da2.firebaseapp.com",
+            projectId: "test1-d0da2",
+            storageBucket: "test1-d0da2.firebasestorage.app",
+            messagingSenderId: "132059408217",
+            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
+        };
+
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+
+        // Références aux éléments HTML
+        const emailInput = document.getElementById("userEmail");
+        const passwordInput = document.getElementById("userPassword");
+        const signInBtn = document.getElementById("signInBtn");
+        const signOutBtn = document.getElementById("signOutBtn");
+        const authStatus = document.getElementById("authStatus");
+        const userEmailDisplay = document.getElementById("userEmailDisplay");
+        const userIdDisplay = document.getElementById("userIdDisplay");
+        const emailVerifiedDisplay = document.getElementById("emailVerified");
+        const verifyEmailBtn = document.getElementById("verifyEmailBtn");
+
+        // Connexion utilisateur
+        signInBtn.addEventListener("click", async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                alert("Veuillez entrer un email et un mot de passe.");
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert("Erreur de connexion : " + error.message);
+            }
+        });
+
+        // Déconnexion utilisateur
+        signOutBtn.addEventListener("click", async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                alert("Erreur lors de la déconnexion : " + error.message);
+            }
+        });
+
+        // Vérification de l'email
+        verifyEmailBtn.addEventListener("click", async () => {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await sendEmailVerification(user);
+                    alert("Un email de vérification a été envoyé à " + user.email);
+                } catch (error) {
+                    alert("Erreur lors de l'envoi de l'email de vérification : " + error.message);
+                }
+            }
+        });
+
+        // Observer l'état de connexion
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Utilisateur connecté
+                authStatus.textContent = "Connecté";
+                userEmailDisplay.textContent = user.email;
+                userIdDisplay.textContent = user.uid;
+                emailVerifiedDisplay.textContent = user.emailVerified ? "✅ Oui" : "❌ Non";
+
+                // Afficher le bouton de vérification si l'email n'est pas vérifié
+                verifyEmailBtn.style.display = user.emailVerified ? "none" : "block";
+            } else {
+                // Utilisateur déconnecté
+                authStatus.textContent = "Non connecté";
+                userEmailDisplay.textContent = "-";
+                userIdDisplay.textContent = "-";
+                emailVerifiedDisplay.textContent = "-";
+                verifyEmailBtn.style.display = "none";
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

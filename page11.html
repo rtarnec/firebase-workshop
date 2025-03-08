@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Connexion et Gestion des Livres</title>
+</head>
+
+<body>
+    <div>
+        <h2>Connexion</h2>
+        <input type="email" id="userEmail" placeholder="Email" />
+        <input type="password" id="userPassword" placeholder="Mot de passe" />
+        <button id="signInBtn" type="button">Sign In</button>
+        <button id="signOutBtn" type="button">Sign Out</button>
+        <br><br>
+        
+        <div id="userInfo">
+            <p><strong>État de connexion :</strong> <span id="authStatus">Non connecté</span></p>
+            <p><strong>Email :</strong> <span id="userEmailDisplay">-</span></p>
+            <p><strong>ID :</strong> <span id="userIdDisplay">-</span></p>
+            <p><strong>Email vérifié :</strong> <span id="emailVerified">-</span></p>
+        </div>
+
+        <button id="verifyEmailBtn" type="button" style="display: none;">Vérifier mon email</button>
+        
+        <br><br>
+
+        <!-- Formulaire pour ajouter un livre -->
+        <h2>Ajouter un livre</h2>
+        <input type="text" id="bookTitle" placeholder="Titre du livre" />
+        <input type="text" id="bookAuthor" placeholder="Auteur du livre" />
+        <button id="saveBookBtn" type="button">Ajouter un livre</button>
+
+        <!-- Bouton pour afficher tous les livres -->
+        <br><br>
+        <button id="fetchBooksBtn" type="button">Afficher les livres</button>
+
+        <!-- Tableau pour afficher les livres -->
+        <br><br>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Auteur</th>
+                </tr>
+            </thead>
+            <tbody id="booksTableBody">
+                <!-- Les livres seront affichés ici -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged, 
+            sendEmailVerification 
+        } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+        import { getFirestore, addDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
+            authDomain: "test1-d0da2.firebaseapp.com",
+            projectId: "test1-d0da2",
+            storageBucket: "test1-d0da2.firebasestorage.app",
+            messagingSenderId: "132059408217",
+            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
+        };
+
+        // Initialisation de l'application Firebase avec la configuration
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        // Références aux éléments HTML
+        const emailInput = document.getElementById("userEmail");
+        const passwordInput = document.getElementById("userPassword");
+        const signInBtn = document.getElementById("signInBtn");
+        const signOutBtn = document.getElementById("signOutBtn");
+        const authStatus = document.getElementById("authStatus");
+        const userEmailDisplay = document.getElementById("userEmailDisplay");
+        const userIdDisplay = document.getElementById("userIdDisplay");
+        const emailVerifiedDisplay = document.getElementById("emailVerified");
+        const verifyEmailBtn = document.getElementById("verifyEmailBtn");
+        const bookTitleInput = document.getElementById("bookTitle");
+        const bookAuthorInput = document.getElementById("bookAuthor");
+        const saveBookBtn = document.getElementById("saveBookBtn");
+        const fetchBooksBtn = document.getElementById("fetchBooksBtn");
+        const booksTableBody = document.getElementById("booksTableBody");
+
+        // Connexion utilisateur
+        signInBtn.addEventListener("click", async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                alert("Veuillez entrer un email et un mot de passe.");
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert("Erreur de connexion : " + error.message);
+            }
+        });
+
+        // Déconnexion utilisateur
+        signOutBtn.addEventListener("click", async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                alert("Erreur lors de la déconnexion : " + error.message);
+            }
+        });
+
+        // Vérification de l'email
+        verifyEmailBtn.addEventListener("click", async () => {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await sendEmailVerification(user);
+                    alert("Un email de vérification a été envoyé à " + user.email);
+                } catch (error) {
+                    alert("Erreur lors de l'envoi de l'email de vérification : " + error.message);
+                }
+            }
+        });
+
+        // Observer l'état de connexion
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Utilisateur connecté
+                authStatus.textContent = "Connecté";
+                userEmailDisplay.textContent = user.email;
+                userIdDisplay.textContent = user.uid;
+                emailVerifiedDisplay.textContent = user.emailVerified ? "✅ Oui" : "❌ Non";
+                verifyEmailBtn.style.display = user.emailVerified ? "none" : "block";
+            } else {
+                // Utilisateur déconnecté
+                authStatus.textContent = "Non connecté";
+                userEmailDisplay.textContent = "-";
+                userIdDisplay.textContent = "-";
+                emailVerifiedDisplay.textContent = "-";
+                verifyEmailBtn.style.display = "none";
+            }
+        });
+
+        // Fonction pour ajouter un livre à Firestore
+        async function addBookFromInput() {
+            const title = bookTitleInput.value.trim();
+            const author = bookAuthorInput.value.trim();
+
+            if (!title || !author) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "books"), { title, author });
+                alert(`Livre "${title}" ajouté avec succès !`);
+
+                // Réinitialiser les champs après ajout
+                bookTitleInput.value = "";
+                bookAuthorInput.value = "";
+            } catch (error) {
+                alert("Erreur lors de l'ajout du livre :", error);
+            }
+        }
+
+        // Fonction pour récupérer et afficher tous les livres
+        async function fetchBooks() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "books"));
+                booksTableBody.innerHTML = ""; // Vider la table avant de l'actualiser
+
+                querySnapshot.forEach((doc) => {
+                    const book = doc.data();
+                    const row = `<tr><td>${book.title}</td><td>${book.author}</td></tr>`;
+                    booksTableBody.innerHTML += row;
+                });
+
+                console.log("Livres récupérés !");
+            } catch (error) {
+                console.log("Erreur lors de la récupération des livres :", error);
+            }
+        }
+
+        // Ajout des écouteurs d'événements
+        saveBookBtn.addEventListener('click', addBookFromInput);
+        fetchBooksBtn.addEventListener('click', fetchBooks);
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>Firebase Workshop - Page 1</title>
+</head>
+
+<body>
+    <div>
+        <button id="saveBookBtn" type="button">Ajouter un livre</button>
+    </div>
+
+    <script type="module">
+
+        // Importation des modules Firebase nécessaires
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js'
+        import { getFirestore, addDoc, collection } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+
+
+
+
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0aDeE3VRa7x7UsoCfPCj4H8AFGzOb0pI",
+            authDomain: "test1-d0da2.firebaseapp.com",
+            projectId: "test1-d0da2",
+            storageBucket: "test1-d0da2.firebasestorage.app",
+            messagingSenderId: "132059408217",
+            appId: "1:132059408217:web:50c7f389c51b7b8d5a0e48"
+        };
+
+
+        // Initialisation de l'application Firebase avec la configuration
+        const app = initializeApp(firebaseConfig);
+
+        // Obtention d'une référence à la base de données Firestore
+        const db = getFirestore(app);
+
+        // Fonction asynchrone pour enregistrer un livre dans Firestore
+        async function saveBook() {
+            try {
+                await addDoc(collection(db, "books"), {
+                    title: "La trilogie new-yorkaise",
+                    author: "Paul Auster",
+                    //                creationDate: serverTimestamp(),
+                });
+
+                console.log("Livre enregistré!")
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+
+        document.getElementById('saveBookBtn').addEventListener('click', saveBook);
+        // Pourquoi cette ligne définissant un écouteur d’événement (event handler) sur le bouton?
+        // Le script étant un module, les variables et fonctions ne sont pas accessibles dans le scope global.
+        // En conséquence <button onclick="saveBook()">Ajouter un livre</button> ne marcherait pas par défaut
+
+
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                // This gives you a Google Access Token. You can use it to access the Google API.
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                const token = credential.accessToken;
+                // The signed-in user info.
+                const user = result.user;
+                console.log(JSON.stringify(user))
+                // IdP data available using getAdditionalUserInfo(result)
+                // ...
+            }).catch((error) => {
+                // Handle Errors here.
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                // The email of the user's account used.
+                const email = error.customData.email;
+                // The AuthCredential type that was used.
+                const credential = GoogleAuthProvider.credentialFromError(error);
+                // ...
+            });
+
+    </script>
+
+</body>
+
+</html>
